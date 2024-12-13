@@ -1,0 +1,40 @@
+name: CI/CD Checks
+
+on: [push]
+
+jobs:
+  test-lint:
+    name: Test and Lint
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3 python3-venv python3-pip
+          python3 --version
+          cd docnet_backend
+          python3 -m venv venv
+          . venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Set environment variables
+        run: echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> $GITHUB_ENV
+
+      - name: Run Django tests
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: |
+          cd docnet_backend
+          . venv/bin/activate
+          python manage.py migrate
+          python manage.py test
+
+      - name: Lint with flake8
+        run: |
+          cd docnet_backend
+          . venv/bin/activate
+          flake8 .

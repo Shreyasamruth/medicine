@@ -1,0 +1,1 @@
+export const PLATFORM_URL = "https://docnet-frontend.onrender.com";
